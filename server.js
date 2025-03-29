@@ -9,14 +9,29 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
+const mongoURI = process.env.MONGO_URI;
+
+if (!mongoURI) {
+  console.error('MONGO_URI is not defined in environment variables.');
+  process.exit(1); // Exit the process if no MongoDB URI is provided
+}
+
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds if unable to connect
+  })
   .then(() => console.log('MongoDB connected successfully!'))
-  .catch((error) => console.error('MongoDB connection error:', error));
+  .catch((error) => {
+    console.error('MongoDB connection error:', error);
+    process.exit(1); // Exit the process if the database connection fails
+  });
 
 // Socket.IO Logic
 io.on('connection', (socket) => {
@@ -35,6 +50,11 @@ io.on('connection', (socket) => {
 // Routes
 const roomRoutes = require('./routes/roomRoutes');
 app.use('/api/rooms', roomRoutes);
+
+// Health Check Endpoint
+app.get('/health', (req, res) => {
+  res.status(200).send('Server is up and running!');
+});
 
 // Start Server
 const PORT = process.env.PORT || 5000;
