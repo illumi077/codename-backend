@@ -23,14 +23,13 @@ if (!mongoURI) {
   process.exit(1); // Exit the process if no MongoDB URI is provided
 }
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(mongoURI)
   .then(() => console.log('MongoDB connected successfully!'))
   .catch((error) => {
     console.error('MongoDB connection error:', error);
     process.exit(1); // Exit the process on fatal connection errors
   });
 
-  
 // Socket.IO Logic
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
@@ -44,6 +43,9 @@ io.on('connection', (socket) => {
     console.log('A user disconnected:', socket.id);
   });
 });
+
+// Attach Socket.IO instance to the app
+app.set('io', io);
 
 // Routes
 const roomRoutes = require('./routes/roomRoutes');
