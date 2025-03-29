@@ -3,6 +3,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const morgan = require('morgan');
 require('dotenv').config();
 
 const app = express();
@@ -10,8 +11,9 @@ const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors()); // Handle CORS
+app.use(express.json()); // Parse JSON requests
+app.use(morgan('dev')); // Log HTTP requests
 
 // MongoDB Connection
 const mongoURI = process.env.MONGO_URI;
@@ -37,6 +39,20 @@ io.on('connection', (socket) => {
   socket.on('joinRoom', (roomCode) => {
     socket.join(roomCode);
     console.log(`User joined room: ${roomCode}`);
+    // Notify other users in the room
+    socket.to(roomCode).emit('userJoined', socket.id);
+  });
+
+  socket.on('tileRevealed', ({ roomCode, index }) => {
+    console.log(`Tile revealed in room: ${roomCode}, index: ${index}`);
+    io.to(roomCode).emit('updateTile', { index });
+  });
+
+  socket.on('leaveRoom', (roomCode) => {
+    socket.leave(roomCode);
+    console.log(`User left room: ${roomCode}`);
+    // Notify other users in the room
+    socket.to(roomCode).emit('userLeft', socket.id);
   });
 
   socket.on('disconnect', () => {
@@ -53,7 +69,23 @@ app.use('/api/rooms', roomRoutes);
 
 // Health Check Endpoint
 app.get('/health', (req, res) => {
-  res.status(200).send('Server is up and running!');
+  res.status(200).json({ message: 'Server is up and running!' });
+});
+
+// Error Handling Middleware
+app.use((req, res, next) => {
+  const error = new Error('Not Found');
+  error.status = 404;
+  next(error);
+});
+
+app.use((error, req, res, next) => {
+  console.error('Error:', error.message);
+  res.status(error.status || 500).json({
+    error: {
+      message: error.message,
+    },
+  });
 });
 
 // Start Server
