@@ -16,6 +16,14 @@ const gameRoomSchema = new mongoose.Schema({
   gameState: { type: String, enum: ['waiting', 'active', 'ended'], default: 'waiting' },
   timerStartTime: { type: Date, default: null },
   turnHistory: { type: Array, default: [] },
+  redTeamScore: { type: Number, default: 0 },
+  blueTeamScore: { type: Number, default: 0 },
+  lastActivity: { type: Date, default: Date.now },
+  tileActions: {
+    type: [Object], // [{index: Number, clickedBy: String, timestamp: Date}]
+    default: [],
+  },
+  maxPlayers: { type: Number, default: 10 },
 });
 
 module.exports = mongoose.model('GameRoom', gameRoomSchema);
