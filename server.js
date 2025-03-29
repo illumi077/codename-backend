@@ -16,23 +16,21 @@ app.use(express.json());
 // MongoDB Connection
 const mongoURI = process.env.MONGO_URI;
 
+console.log('MONGO_URI:', process.env.MONGO_URI);
+
 if (!mongoURI) {
   console.error('MONGO_URI is not defined in environment variables.');
   process.exit(1); // Exit the process if no MongoDB URI is provided
 }
 
-mongoose
-  .connect(mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds if unable to connect
-  })
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected successfully!'))
   .catch((error) => {
     console.error('MongoDB connection error:', error);
-    process.exit(1); // Exit the process if the database connection fails
+    process.exit(1); // Exit the process on fatal connection errors
   });
 
+  
 // Socket.IO Logic
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
