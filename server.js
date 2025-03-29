@@ -62,6 +62,10 @@ io.on('connection', (socket) => {
 
 // Attach Socket.IO instance to the app
 app.set('io', io);
+app.get('/', (req, res) => {
+  res.status(200).send('Welcome to the Game Room Service!');
+});
+
 
 // Routes
 const roomRoutes = require('./routes/roomRoutes');
