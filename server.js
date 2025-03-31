@@ -34,6 +34,7 @@ const io = new Server(server, {
   cors: {
     origin: 'http://localhost:5173', // Allow requests from frontend origin
     methods: ['GET', 'POST', 'DELETE'],
+    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
   },
 });
 
