@@ -5,14 +5,17 @@ const connectDB = require('./config/db'); // Database connection
 require('dotenv').config(); // Load environment variables
 const roomRoutes = require('./routes/roomRoutes'); // Room-related API routes
 const socketHandler = require('./sockets/socketHandler'); // Socket.IO logic
+const cors = require('cors');
 
 const app = express();
 
 // Middleware
 app.use(express.json()); // Parse JSON payloads
 app.use(express.urlencoded({ extended: true })); // Handle URL-encoded payloads
-const cors = require('cors');
-app.use(cors()); // Allow cross-origin requests
+app.use(cors({ origin: 'http://localhost:5173' })); // Allow requests from frontend origin
+
+// Handle Preflight Requests
+app.options('*', cors()); // Enable preflight for all routes
 
 // Connect to MongoDB
 connectDB();
@@ -29,7 +32,7 @@ app.get('/', (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*', // Replace with your frontend URL for production
+    origin: 'http://localhost:5173', // Allow requests from frontend origin
     methods: ['GET', 'POST', 'DELETE'],
   },
 });
