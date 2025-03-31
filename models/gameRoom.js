@@ -1,29 +1,24 @@
 const mongoose = require('mongoose');
 
 const gameRoomSchema = new mongoose.Schema({
-  roomCode: { type: String, required: true, unique: true },
-  wordSet: { type: [String], required: true },
-  patterns: { type: [String], required: true },
-  revealedTiles: { type: [Boolean], default: Array(25).fill(false) },
-  players: [
+  roomCode: { type: String, required: true, unique: true }, // Room's unique identifier
+  gridState: [
     {
-      username: { type: String, required: true },
-      role: { type: String, enum: ['Spymaster', 'Agent'], required: true },
-      team: { type: String, enum: ['Red', 'Blue'], required: true },
+      word: { type: String, required: true }, // Word displayed on the tile
+      color: { type: String, enum: ['red', 'blue', 'grey', 'black'], required: true }, // Tile type
+      revealed: { type: Boolean, default: false }, // Whether the tile has been revealed
     },
   ],
-  currentTurnTeam: { type: String, enum: ['Red', 'Blue'], default: null },
-  gameState: { type: String, enum: ['waiting', 'active', 'ended'], default: 'waiting' },
-  timerStartTime: { type: Date, default: null },
-  turnHistory: { type: Array, default: [] },
-  redTeamScore: { type: Number, default: 0 },
-  blueTeamScore: { type: Number, default: 0 },
-  lastActivity: { type: Date, default: Date.now },
-  tileActions: {
-    type: [Object], // [{index: Number, clickedBy: String, timestamp: Date}]
-    default: [],
-  },
-  maxPlayers: { type: Number, default: 10 },
+  players: [
+    {
+      username: { type: String, required: true }, // Player's name
+      role: { type: String, enum: ['Spymaster', 'Agent'], required: true }, // Player's role
+      team: { type: String, enum: ['Red', 'Blue'], required: true }, // Player's team
+    },
+  ],
+  currentTurnTeam: { type: String, enum: ['Red', 'Blue'], default: null }, // Team whose turn it currently is
+  gameState: { type: String, enum: ['waiting', 'active', 'ended'], default: 'waiting' }, // Game's state
+  timerStartTime: { type: Date, default: null }, // Timestamp when the turn timer started
 });
 
 module.exports = mongoose.model('GameRoom', gameRoomSchema);

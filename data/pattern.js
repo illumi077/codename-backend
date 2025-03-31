@@ -142,5 +142,9 @@ const predefinedPatterns = [
         'red'
       ]
 ];
+const getRandomPattern = () => {
+  const randomIndex = Math.floor(Math.random() * predefinedPatterns.length); // Randomly select a pattern index
+  return predefinedPatterns[randomIndex];
+};
 
-export default predefinedPatterns;
+module.exports = { getRandomPattern };
